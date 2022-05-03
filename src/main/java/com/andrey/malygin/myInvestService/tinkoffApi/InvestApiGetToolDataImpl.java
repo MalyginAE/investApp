@@ -1,0 +1,27 @@
+package com.andrey.malygin.myInvestService.tinkoffApi;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import ru.tinkoff.piapi.contract.v1.LastPrice;
+import ru.tinkoff.piapi.core.InvestApi;
+
+import java.util.Collections;
+import java.util.List;
+@Service
+public class InvestApiGetToolDataImpl implements InvestApiGetToolData {
+    @Value("${tinkoff-invest-token}")
+    private static String token;
+    private static final InvestApi api = InvestApi.create(token);
+
+    @Override
+    public LastPrice getLastPriceTool(String figi) {
+        var lastPrices = api.getMarketDataService().getLastPricesSync(Collections.singleton(figi));
+        return lastPrices.get(0);
+    }
+
+    @Override
+    public List<LastPrice> getLastPriceTools(List<String> figies) {
+        return api.getMarketDataService().getLastPricesSync(figies);
+    }
+}
