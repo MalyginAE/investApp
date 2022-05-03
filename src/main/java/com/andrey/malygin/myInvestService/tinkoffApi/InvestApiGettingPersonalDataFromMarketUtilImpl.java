@@ -1,5 +1,7 @@
 package com.andrey.malygin.myInvestService.tinkoffApi;
 
+import com.andrey.malygin.myInvestService.tinkoffApi.helpers.CommonInvestApiHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -8,12 +10,11 @@ import ru.tinkoff.piapi.core.models.Money;
 import ru.tinkoff.piapi.core.models.Positions;
 import ru.tinkoff.piapi.core.models.SecurityPosition;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 @Service
 public class InvestApiGettingPersonalDataFromMarketUtilImpl implements InvestApiGettingPersonalDataFromMarketUtil {
-    @Value("${tinkoff-invest-token}")
-    private static String token ;
-    private static final InvestApi api = InvestApi.create(token);
+    private static final InvestApi api = CommonInvestApiHelper.getInvestApi();
 
     @NotNull
     private  Positions getPositions() {

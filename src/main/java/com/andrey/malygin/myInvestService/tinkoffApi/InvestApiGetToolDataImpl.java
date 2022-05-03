@@ -10,8 +10,7 @@ import java.util.Collections;
 import java.util.List;
 @Service
 public class InvestApiGetToolDataImpl implements InvestApiGetToolData {
-    @Value("${tinkoff-invest-token}")
-    private static String token;
+    private  static String token ;
     private static final InvestApi api = InvestApi.create(token);
 
     @Override

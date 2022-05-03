@@ -1,9 +1,6 @@
 package com.andrey.malygin.myInvestService.tinkoffApi.helpers;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 public interface InvestApiHelper {
 //    final Map<Ticker, String> STRING_MAP = new HashMap<>(Map.of(
 //
@@ -11,5 +8,10 @@ public interface InvestApiHelper {
     default String getFIGI(Ticker ticker){
 
         return "";
+    }
+    default String getToken(boolean isReadOnly){
+        String token = System.getProperty("investApiToken");
+        String tokenAdmin = System.getProperty("investApiTokenAdmin");
+        return isReadOnly ? token : tokenAdmin;
     }
 }
