@@ -1,13 +1,13 @@
 package com.andrey.malygin.investservice.postgresql.telegram.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,5 +26,27 @@ public class Chats {
 
     public Chats(Long chatId) {
         this.chatId = chatId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Chats chats = (Chats) o;
+        return id != null && Objects.equals(id, chats.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Chats{" +
+                "id=" + id +
+                ", user=" + user +
+                ", chatId=" + chatId +
+                '}';
     }
 }

@@ -11,7 +11,8 @@ public enum TelegramMessagesToUser {
 
 
 
-    messageRecommendedPurchase() , messageRecommendedClose();
+    messageRecommendedPurchase() , messageRecommendedClose(), START_INSTRUCTION("/start - напишите для начала..." +
+            "\n чтоб написать создателю отправьте боту сообщение в формате: \"/messageToAndrey ...(текст)\" , а дальше сообщение\n Пример:\n/messageToAndrey Привет,Андрей! Ну где ты был, ну обними меня скорей");
 
     String message;
 
