@@ -9,14 +9,18 @@ import com.andrey.malygin.investservice.postgresql.telegram.repository.UserRepos
 import com.andrey.malygin.investservice.telegramApi.util.InputMessageCommands;
 import com.andrey.malygin.investservice.telegramApi.util.TelegramBotUtil;
 import com.andrey.malygin.investservice.telegramApi.util.TelegramMessagesToUser;
+import com.andrey.malygin.investservice.tinkoffApi.InvestApiGettingPersonalDataFromMarketUtil;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.tinkoff.piapi.core.models.Money;
+import ru.tinkoff.piapi.core.models.SecurityPosition;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,6 +34,8 @@ public abstract class TelegramAbstractBaseInfoBot {
     protected ChatRepository chatRepository;
     @Autowired
     protected MessageRepository messageRepository;
+    @Autowired
+    InvestApiGettingPersonalDataFromMarketUtil dataFromMarketUtil;
 
 
     protected void sendMessageEveryone(String message) {
@@ -62,8 +68,8 @@ public abstract class TelegramAbstractBaseInfoBot {
         if (!update.message().text().isEmpty()) {
             User user = userRepository.findByUserName(update.message().chat().username())
                     .orElse(userRepository.findByFirstName(update.message().chat().firstName())
-                    .orElse(userRepository.findByLastName(update.message().chat().lastName()).orElseThrow())); // гарантируется что не может быть null , потому что перед этим мы заполнили бд данными этого User'a
-           //log.info("User = "+user.toString());
+                            .orElse(userRepository.findByLastName(update.message().chat().lastName()).orElseThrow())); // гарантируется что не может быть null , потому что перед этим мы заполнили бд данными этого User'a
+            //log.info("User = "+user.toString());
             MessageFromUser message = new MessageFromUser(inputTextFromUser, new Date(), user);
             messageRepository.save(message);
         }
@@ -83,16 +89,31 @@ public abstract class TelegramAbstractBaseInfoBot {
     }
 
     private void sendAnswer(Message message, InputMessageCommands value) {
+        long chatId = message.chat().id();
         switch (value) {
             case START -> {
-                sendMessage(message.chat().id(), TelegramMessagesToUser.START_INSTRUCTION.getMessage());
-                sendMessage(message.chat().id(), TelegramMessagesToUser.aboutMeMessage.getMessage());
+                sendMessage(chatId, TelegramMessagesToUser.START_INSTRUCTION.getMessage());
+                sendMessage(chatId, TelegramMessagesToUser.aboutMeMessage.getMessage());
             }
-            case DESCRIPTION -> sendMessage(message.chat().id(), TelegramMessagesToUser.aboutMeMessage.getMessage());
+            case DESCRIPTION -> sendMessage(chatId, TelegramMessagesToUser.aboutMeMessage.getMessage());
             case MESSSAGETOANDREY -> sendMessageToAndrey(message);
+            case CURRENTBALANCE -> sendMessage(chatId, getBalanceText(TelegramMessagesToUser.currentBalance.getMessage()));
             default -> sendMessage(message.chat().id(), TelegramMessagesToUser.START_INSTRUCTION.getMessage());
         }
 
+    }
+
+    private String getBalanceText(String startText) {
+        StringBuilder builder = new StringBuilder(startText);
+        List<Money> monies = dataFromMarketUtil.getListMoney();
+        for (Money money : monies) {
+            builder.append(money.getCurrency().getCurrencyCode() + " : " + money.getValue() + "\n");
+        }
+        List<SecurityPosition> activePosition = dataFromMarketUtil.getMyActivePosition();
+        for (SecurityPosition securityPosition : activePosition) {
+            builder.append(TelegramBotUtil.FigiStockMap.get(securityPosition.getFigi()) + " : " + securityPosition.getBalance());
+        }
+        return String.valueOf(builder);
     }
 
     private void sendMessageToAndrey(Message message) {

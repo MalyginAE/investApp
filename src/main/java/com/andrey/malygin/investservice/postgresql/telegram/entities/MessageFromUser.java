@@ -9,7 +9,6 @@ import java.util.Date;
 @Setter
 @ToString
 @RequiredArgsConstructor
-
 @AllArgsConstructor
 @Builder
 @Entity
